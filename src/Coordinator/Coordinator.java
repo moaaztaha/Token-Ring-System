@@ -18,6 +18,7 @@ public class Coordinator implements Runnable{
     static ArrayList<PeerInfo> peers = new ArrayList<PeerInfo>();
     Socket peer;
     static int counter = 0;
+    static String portGenerator = "3000";
     
     public Coordinator(Socket peer)
     {
@@ -113,7 +114,7 @@ public class Coordinator implements Runnable{
                     
                         // update the previous
                             // to-do what if u have only one peer!!
-                    if (currentIndex==0 || currentIndex==-1)
+                    if (peers.size()==0 || currentIndex==-1)
                     {
                         peers.clear();
                     }
@@ -129,16 +130,12 @@ public class Coordinator implements Runnable{
                     break;
                     
                 case "getPort":
-                    if (peers.size() == 0)
-                    {
                         message = new HashMap<String, String>();
-                        message.put("port", "3000");
-                    }
-                    else
-                    {
-                        int p = Integer.parseInt(peers.get(peers.size()-1).getPort()) + 1;
-                        message.put("port", Integer.toString(p));
-                    }
+                        System.out.println("last Port:" + portGenerator);
+                        int p = Integer.parseInt(portGenerator) + 1;
+                        portGenerator = Integer.toString(p);
+                        System.out.println("Port" + portGenerator);
+                        message.put("port", portGenerator);
                     
                     ObjectOutputStream mout = new ObjectOutputStream(new DataOutputStream(peer.getOutputStream()));
                     mout.writeObject(message);
@@ -170,9 +167,7 @@ public class Coordinator implements Runnable{
         all += "*************";
         System.out.println("***************");
         
-        peers.get(0).setNextPort("Asdasd");
-        peers.get(1).setPort("asdasd");
-         return all;   
+        return all;   
     }
     
     
@@ -184,10 +179,18 @@ public class Coordinator implements Runnable{
             {
                 Map<String, String> message = new Hashtable<String, String>();
                 message.put("task", "update");
-                message.put("port", peers.get(currentIndex).getNextPort());
+                String nextPort = peers.get(currentIndex).getNextPort();
+                message.put("port", nextPort);
 
                 // u were tacking the leave code
                 System.out.println("The prepared Message, port:" + peers.get(currentIndex).getNextPort());
+                
+                // incase: first one leaving, the previos will be the last one 
+                if (currentIndex == 0)
+                    currentIndex = peers.size();
+                
+                // update arraylist
+                peers.get(currentIndex-1).setNextPort(nextPort);
                 
                 // connect
                 String port = peers.get(currentIndex-1).getPort();
@@ -198,7 +201,7 @@ public class Coordinator implements Runnable{
 
                 mout.writeObject(message);
 
-
+                
                 // close
                 mout.close();
                 p.close();

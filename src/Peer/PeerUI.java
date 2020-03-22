@@ -125,6 +125,9 @@ public class PeerUI extends javax.swing.JFrame {
         // TODO add your handling code here:
         Peer.join();
         jButton1.setEnabled(false);
+        jButton2.setEnabled(true);
+        jLabel3.setText(Peer.getPort());
+        jLabel4.setText(Peer.getNextPort());
     }//GEN-LAST:event_jButton1ActionPerformed
 
     private void jButton2ActionPerformed(java.awt.event.ActionEvent evt) {//GEN-FIRST:event_jButton2ActionPerformed
