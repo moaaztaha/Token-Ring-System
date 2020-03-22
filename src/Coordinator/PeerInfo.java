@@ -69,7 +69,7 @@ public class PeerInfo {
     @Override
     public String toString()
     {
-        return "Peer{ID:" +id+ ",port:" + port +", next Port:"+nextPort+", Token:"+token+'}';
+        return "Peer{ID:" +id+ ",port:" + port +", next Port:"+nextPort+", Has Token:"+token+'}';
     }
     
     

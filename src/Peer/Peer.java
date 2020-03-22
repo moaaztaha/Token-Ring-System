@@ -16,8 +16,7 @@ import java.util.*;
 public class Peer implements Runnable{
     private static String port;
     private static String nextPort;
-    private static boolean hasToken;
-    private static String token;
+    private static String tokens = "";
     
     Socket scSocket;
     
@@ -118,8 +117,33 @@ public class Peer implements Runnable{
                     nextPort = message.get("port");
                     System.out.println("Nextport updated through run "+nextPort+ " current " + port);
                     break;
+                
+                case "forward":
+                    // check if it's from me 
+                    if (!message.get("src").equals(port))
+                    {
+                        // save token
+                        tokens = tokens + message.get("token") + "\n";
+                        
+                        // forward
+                        send(message.get("token"), message.get("src"));
+                        
+                        // inform the coordinator
+                        message.clear();
+                        message.put("task", "token");
+                        message.put("port", port);
+                        Socket mServer = new Socket("localhost", 2000);
+
+                        // send map
+                        ObjectOutputStream mout = new ObjectOutputStream(
+                                new DataOutputStream(mServer.getOutputStream()));
+                        mout.writeObject(message);
+                        
+                        mout.close();
+                        mServer.close();                    }
             }
             
+            min.close();
         }
         catch (Exception i)
         {
@@ -127,6 +151,33 @@ public class Peer implements Runnable{
         }
     }
     
+    // Sending token
+    public static void send(String token, String src)
+    {
+        try
+        {
+            // establis connection
+            Socket p = new Socket("localhost", Integer.parseInt(nextPort));
+            ObjectOutputStream mout = new ObjectOutputStream(
+                                new DataOutputStream(p.getOutputStream())
+                            );
+            
+            Map<String, String> message = new Hashtable<String, String>();
+            message.put("task", "forward");
+            message.put("token", token);
+            message.put("port", port);
+            message.put("src", src);
+            
+            mout.writeObject(message);
+            
+            mout.close();
+            p.close();
+        }
+        catch (Exception i)
+        {
+            System.out.println(i);
+        }
+    }
     
     
     public static String getPort()
@@ -137,6 +188,11 @@ public class Peer implements Runnable{
     public static String getNextPort()
     {
         return nextPort;
+    }
+    
+    public static String getTokens()
+    {
+        return tokens;
     }
     
     public static void main(String args[])

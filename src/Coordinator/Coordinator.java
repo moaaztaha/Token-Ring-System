@@ -17,7 +17,7 @@ public class Coordinator implements Runnable{
     
     static ArrayList<PeerInfo> peers = new ArrayList<PeerInfo>();
     Socket peer;
-    static int counter = 0;
+    static int counter = 1;
     static String portGenerator = "3000";
     
     public Coordinator(Socket peer)
@@ -143,6 +143,25 @@ public class Coordinator implements Runnable{
                     mout.close();
                         
                     break;
+                
+                case "token":
+                    // reset all the list
+                    for (PeerInfo pe: peers)
+                    {
+                        pe.setToken(false);
+                    }
+                    // set the current one to true
+                    port = message.get("port");
+                    for (PeerInfo pe: peers)
+                    {
+                        if (pe.getPort().equals(port))
+                        {
+                            pe.setToken(true);
+                            break;
+                        }
+                    }
+                    
+                    
             }
             
             min.close();
@@ -164,8 +183,6 @@ public class Coordinator implements Runnable{
             System.out.println(p);
             all += p + "\n";
         }
-        all += "*************";
-        System.out.println("***************");
         
         return all;   
     }
